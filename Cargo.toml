@@ -3,6 +3,9 @@ name = "pbo"
 version = "0.1.0"
 authors = ["Brett <brett@bmandesigns.com>"]
 edition = "2018"
+description = "Read and Write PBO files"
+license = "GPL-3.0-or-later"
+repository = "https://github.com/SynixeBrett/pbo-rs"
 
 [dependencies]
 linked-hash-map = "0.5"

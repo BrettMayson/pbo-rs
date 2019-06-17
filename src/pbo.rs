@@ -31,10 +31,10 @@ impl PBO {
         loop {
             let header = PBOHeader::read(input)?;
 
-            if header.method == 0x56657273 {
+            if header.method == 0x5665_7273 {
                 loop {
                     let s = input.read_cstring()?;
-                    if s.len() == 0 { break; }
+                    if s.is_empty() { break; }
                     pbo.extensions.insert(s, input.read_cstring()?);
                 }
             } else if header.filename.is_empty() {
@@ -62,7 +62,7 @@ impl PBO {
 
         let ext_header = PBOHeader {
             filename: String::new(),
-            method: 0x56657273,
+            method: 0x5665_7273,
             original: 0,
             reserved: 0,
             timestamp: 0,

@@ -25,18 +25,15 @@ impl<T: Read> ReadExt for T {
     }
 
     fn read_compressed_int(&mut self) -> io::Result<u32> {
-        let mut i = 0;
         let mut result: u32 = 0;
 
-        for byte in self.bytes() {
+        for (i, byte) in self.bytes().enumerate() {
             let b: u32 = byte?.into();
-            result = result | ((b & 0x7f) << (i * 7));
+            result |= (b & 0x7f) << (i * 7);
 
             if b < 0x80 {
                 break;
             }
-
-            i += 1;
         }
 
         Ok(result)
@@ -60,13 +57,13 @@ impl<T: Write> WriteExt for T {
         let mut len = 0;
 
         while temp > 0x7f {
-            self.write(&[(0x80 | temp & 0x7f) as u8])?;
+            self.write_all(&[(0x80 | temp & 0x7f) as u8])?;
             len += 1;
             temp &= !0x7f;
             temp >>= 7;
         }
 
-        self.write(&[temp as u8])?;
+        self.write_all(&[temp as u8])?;
         Ok(len + 1)
     }
 }

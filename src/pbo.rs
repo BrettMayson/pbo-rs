@@ -12,6 +12,7 @@ use crate::header::PBOHeader;
 pub struct PBO {
     pub files: LinkedHashMap<String, Cursor<Box<[u8]>>>,
     pub extensions: HashMap<String, String>,
+    pub extension_order: Vec<String>,
     pub headers: Vec<PBOHeader>,
     pub checksum: Option<Vec<u8>>,
 }
@@ -21,6 +22,7 @@ impl PBO {
         Self {
             files: LinkedHashMap::new(),
             extensions: HashMap::new(),
+            extension_order: Vec::new(),
             headers: Vec::new(),
             checksum: None,
         }
@@ -35,7 +37,8 @@ impl PBO {
                 loop {
                     let s = input.read_cstring()?;
                     if s.is_empty() { break; }
-                    pbo.extensions.insert(s, input.read_cstring()?);
+                    pbo.extensions.insert(s.clone(), input.read_cstring()?);
+                    pbo.extension_order.push(s);
                 }
             } else if header.filename.is_empty() {
                 break;
@@ -53,6 +56,7 @@ impl PBO {
         input.bytes().next();
         let mut checksum = vec![0; 20];
         input.read_exact(&mut checksum)?;
+        pbo.checksum = Some(checksum);
 
         Ok(pbo)
     }

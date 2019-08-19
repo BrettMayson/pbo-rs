@@ -1,6 +1,7 @@
 mod pbo;
-mod header;
-pub mod io;
+pub use crate::pbo::PBO;
 
-pub use pbo::PBO;
-pub use header::PBOHeader;
+mod header;
+pub use crate::header::PBOHeader;
+
+pub mod io;

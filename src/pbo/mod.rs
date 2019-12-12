@@ -35,7 +35,7 @@ impl<I: Seek + Read> PBO<I> {
     }
 
     /// Enable or disable read caching
-    /// 
+    ///
     /// When enabled, files will be stored in RAM after being read
     /// future reads will
     pub fn set_cache_enabled(&mut self, enable: bool) -> bool {

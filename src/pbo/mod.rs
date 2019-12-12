@@ -51,9 +51,13 @@ impl<I: Seek + Read> PBO<I> {
 
     /// Clears the read cache in RAM
     pub fn clear_cache(&mut self) {
-        let files = self.files(true);
+        let files = self
+            .files(true)
+            .iter()
+            .map(|h| h.filename.clone())
+            .collect::<Vec<String>>();
         let mut remove = Vec::new();
-        for (n, _) in &self.files {
+        for n in self.files.keys() {
             if !files.contains(&n) {
                 remove.push(n.to_string());
             }
@@ -64,17 +68,31 @@ impl<I: Seek + Read> PBO<I> {
     }
 
     /// A list of filenames in the PBO
-    pub fn files(&self, disk_only: bool) -> Vec<String> {
+    pub fn files(&self, disk_only: bool) -> Vec<PBOHeader> {
         let mut filenames = Vec::new();
         for h in &self.headers {
-            filenames.push(h.filename.clone());
+            filenames.push(h.clone());
         }
         if !disk_only {
-            for (n, _) in &self.files {
-                filenames.push(n.to_string());
+            for (n, c) in &self.files {
+                filenames.push(PBOHeader {
+                    filename: n.clone(),
+                    method: 0,
+                    original: c.get_ref().len() as u32,
+                    reserved: 0,
+                    timestamp: 0,
+                    size: c.get_ref().len() as u32,
+                });
             }
         }
         filenames
+    }
+
+    /// Get files in alphabetical order
+    pub fn files_sorted(&self, disk_only: bool) -> Vec<PBOHeader> {
+        let mut sorted = self.files(disk_only);
+        sorted.sort_by(|a, b| a.filename.to_lowercase().cmp(&b.filename.to_lowercase()));
+        sorted
     }
 
     /// Finds a header if it exists

@@ -18,7 +18,6 @@ impl<T: Read> ReadExt for T {
             } else {
                 bytes.push(b);
             }
-
         }
 
         Ok(String::from_utf8(bytes).unwrap())

@@ -83,13 +83,13 @@ impl<I: Seek + Read> PBO<I> {
             headers.write_cstring(prefix)?;
         }
 
-        for (key, value) in self.extensions.iter() {
+        for key in &self.extension_order {
             if key == "prefix" {
                 continue;
             }
 
             headers.write_cstring(key)?;
-            headers.write_cstring(value)?;
+            headers.write_cstring(self.extensions.get(key).unwrap())?;
         }
         headers.write_cstring(String::new())?;
 

@@ -66,6 +66,11 @@ impl<I: Seek + Read> PBO<I> {
 
     /// Generate a checksum of the PBO
     pub fn checksum(&mut self) -> Result<Vec<u8>, Error> {
+
+        if let Some(checksum) = &self.checksum {
+            return Ok(checksum.to_vec());
+        }
+
         let mut headers: Cursor<Vec<u8>> = Cursor::new(Vec::new());
 
         let ext_header = PBOHeader {
@@ -96,6 +101,14 @@ impl<I: Seek + Read> PBO<I> {
         let files_sorted = self.files_sorted(false);
 
         for header in &files_sorted {
+            let header = PBOHeader {
+                filename: header.filename.clone(),
+                method: 0,
+                original: header.original,
+                reserved: 0,
+                timestamp: 0,
+                size: header.size,
+            };
             header.write(&mut headers)?;
         }
 

@@ -112,7 +112,7 @@ impl<I: Seek + Read> PBO<I> {
         } else {
             let input = self.input.as_mut().unwrap();
             (*input)
-                .seek(SeekFrom::Start(self.blob_start + 14))
+                .seek(SeekFrom::Start(self.blob_start))
                 .unwrap();
             for h in &self.headers {
                 if h.filename == filename {

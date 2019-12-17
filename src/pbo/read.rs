@@ -36,9 +36,7 @@ impl<I: Seek + Read> PBO<I> {
         input.seek(SeekFrom::Current(1))?;
         let mut checksum = vec![0; 20];
         input.read_exact(&mut checksum)?;
-        println!("Hash: {:?}", checksum);
         pbo.checksum = Some(checksum);
-
 
         pbo.input = Some(input);
 

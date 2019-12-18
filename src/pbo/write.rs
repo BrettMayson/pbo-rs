@@ -25,13 +25,13 @@ impl<I: Seek + Read> PBO<I> {
             headers.write_cstring(prefix)?;
         }
 
-        for (key, value) in self.extensions.iter() {
+        for key in &self.extension_order {
             if key == "prefix" {
                 continue;
             }
 
             headers.write_cstring(key)?;
-            headers.write_cstring(value)?;
+            headers.write_cstring(self.extensions.get(key).unwrap())?;
         }
         headers.write_cstring(String::new())?;
 
@@ -71,6 +71,10 @@ impl<I: Seek + Read> PBO<I> {
             return Ok(checksum.to_vec());
         }
 
+        self.gen_checksum()
+    }
+
+    pub fn gen_checksum(&mut self) -> Result<Vec<u8>, Error> {
         let mut headers: Cursor<Vec<u8>> = Cursor::new(Vec::new());
 
         let ext_header = PBOHeader {

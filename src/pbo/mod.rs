@@ -58,7 +58,7 @@ impl<I: Seek + Read> PBO<I> {
             .collect::<Vec<String>>();
         let mut remove = Vec::new();
         for n in self.files.keys() {
-            if !files.contains(&n) {
+            if !files.contains(n) {
                 remove.push(n.to_string());
             }
         }
@@ -111,9 +111,7 @@ impl<I: Seek + Read> PBO<I> {
             return Some(f.clone());
         } else {
             let input = self.input.as_mut().unwrap();
-            (*input)
-                .seek(SeekFrom::Start(self.blob_start))
-                .unwrap();
+            (*input).seek(SeekFrom::Start(self.blob_start)).unwrap();
             for h in &self.headers {
                 if h.filename == filename {
                     let mut buffer: Box<[u8]> = vec![0; h.size as usize].into_boxed_slice();
@@ -124,7 +122,7 @@ impl<I: Seek + Read> PBO<I> {
                     }
                     return Some(Cursor::new(buffer));
                 } else {
-                    (*input).seek(SeekFrom::Current(h.size as i64)).unwrap();
+                    (*input).seek(SeekFrom::Current(i64::from(h.size))).unwrap();
                 }
             }
         }

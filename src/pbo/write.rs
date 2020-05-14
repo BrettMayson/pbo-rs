@@ -2,7 +2,7 @@ use std::io::{Cursor, Error, Read, Seek, Write};
 
 use openssl::hash::{Hasher, MessageDigest};
 
-use crate::io::*;
+use crate::io::WriteExt;
 use crate::{PBOHeader, PBO};
 
 impl<I: Seek + Read> PBO<I> {
@@ -66,7 +66,6 @@ impl<I: Seek + Read> PBO<I> {
 
     /// Generate a checksum of the PBO
     pub fn checksum(&mut self) -> Result<Vec<u8>, Error> {
-
         if let Some(checksum) = &self.checksum {
             return Ok(checksum.to_vec());
         }

@@ -1,12 +1,12 @@
 use std::io::{Error, Read, Seek, SeekFrom};
 
-use crate::io::*;
+use crate::io::ReadExt;
 use crate::{PBOHeader, PBO};
 
 impl<I: Seek + Read> PBO<I> {
     /// Create a PBO object by reading a file
     pub fn read(mut input: I) -> Result<Self, Error> {
-        let mut pbo = PBO::new();
+        let mut pbo = Self::new();
         loop {
             let (header, size) = PBOHeader::read(&mut input)?;
             pbo.blob_start += size as u64;
@@ -30,7 +30,7 @@ impl<I: Seek + Read> PBO<I> {
         }
 
         for header in &pbo.headers {
-            input.seek(SeekFrom::Current(header.size as i64)).unwrap();
+            input.seek(SeekFrom::Current(i64::from(header.size))).unwrap();
         }
 
         input.seek(SeekFrom::Current(1))?;

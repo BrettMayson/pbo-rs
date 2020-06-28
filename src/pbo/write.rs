@@ -18,20 +18,25 @@ impl<I: Seek + Read> PBO<I> {
             timestamp: 0,
             size: 0,
         };
+        trace!("writing ext header: {:?}", ext_header);
         ext_header.write(&mut headers)?;
 
         if let Some(prefix) = self.extensions.get("prefix") {
+            trace!("writing prefix header: {:?}", prefix);
             headers.write_all(b"prefix\0")?;
             headers.write_cstring(prefix)?;
+        } else {
+            trace!("no prefix header")
         }
 
         for key in &self.extension_order {
             if key == "prefix" {
                 continue;
             }
-
             headers.write_cstring(key)?;
-            headers.write_cstring(self.extensions.get(key).unwrap())?;
+            let header_value = self.extensions.get(key).unwrap();
+            trace!("writing `{}` header: {:?}", key, header_value);
+            headers.write_cstring(header_value)?;
         }
         headers.write_cstring(String::new())?;
 
@@ -45,6 +50,7 @@ impl<I: Seek + Read> PBO<I> {
             method: 0,
             ..ext_header
         };
+        trace!("writing null header");
         header.write(&mut headers)?;
 
         let mut h = Hasher::new(MessageDigest::sha1()).unwrap();
@@ -53,13 +59,16 @@ impl<I: Seek + Read> PBO<I> {
         h.update(headers.get_ref()).unwrap();
 
         for header in &files_sorted {
+            trace!("writing & hashing file {}", header.filename);
             let cursor = self.retrieve(&header.filename).unwrap();
             output.write_all(cursor.get_ref())?;
             h.update(cursor.get_ref()).unwrap();
         }
 
         output.write_all(&[0])?;
-        output.write_all(&*h.finish().unwrap())?;
+        let hash = &*h.finish().unwrap();
+        debug!("pbo generated hash: {:?}", hash);
+        output.write_all(hash)?;
 
         Ok(())
     }

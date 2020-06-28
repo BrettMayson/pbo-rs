@@ -39,6 +39,7 @@ impl<I: Seek + Read> PBO<I> {
     /// When enabled, files will be stored in RAM after being read
     /// future reads will be pulled from RAM
     pub fn set_cache_enabled(&mut self, enable: bool) -> bool {
+        debug!("setting cache enabled: {}", enable);
         let ret = self.read_cache;
         self.read_cache = enable;
         ret
@@ -62,7 +63,9 @@ impl<I: Seek + Read> PBO<I> {
                 remove.push(n.to_string());
             }
         }
+        debug!("clearing cache of {} files", remove.len());
         for n in remove {
+            trace!("clearing {}", n);
             self.files.remove(&n);
         }
     }
@@ -108,8 +111,10 @@ impl<I: Seek + Read> PBO<I> {
     /// Retreives a file from a PBO
     pub fn retrieve(&mut self, filename: &str) -> Option<Cursor<Box<[u8]>>> {
         if let Some(f) = self.files.get(filename) {
+            debug!("retrieving file from struct: {}", filename);
             return Some(f.clone());
         } else {
+            debug!("retrieving file from disk: {}", filename);
             let input = self.input.as_mut().unwrap();
             (*input).seek(SeekFrom::Start(self.blob_start)).unwrap();
             for h in &self.headers {
@@ -131,11 +136,13 @@ impl<I: Seek + Read> PBO<I> {
 
     /// Removes a file, returning it if it existed
     pub fn remove(&mut self, filename: &str) -> Option<Cursor<Box<[u8]>>> {
+        debug!("removing file from struct: {}", filename);
         self.files.remove(filename)
     }
 
     /// Adds or updates a file to the PBO, returns the old file if it existed
     pub fn add(&mut self, filename: &str, file: Cursor<Box<[u8]>>) -> Option<Cursor<Box<[u8]>>> {
+        debug!("adding file to struct: {}", filename);
         self.files.insert(filename.to_string(), file)
     }
 }

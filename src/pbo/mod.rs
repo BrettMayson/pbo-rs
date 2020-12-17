@@ -101,7 +101,7 @@ impl<I: Seek + Read> PBO<I> {
     /// Finds a header if it exists
     pub fn header(&mut self, filename: &str) -> Option<PBOHeader> {
         for header in &self.headers {
-            if header.filename == filename {
+            if header.filename == filename.replace("/", "\\").as_str() {
                 return Some(header.clone());
             }
         }
@@ -110,6 +110,8 @@ impl<I: Seek + Read> PBO<I> {
 
     /// Retreives a file from a PBO
     pub fn retrieve(&mut self, filename: &str) -> Option<Cursor<Box<[u8]>>> {
+        let filename_owned = filename.replace("/", "\\");
+        let filename = filename_owned.as_str();
         if let Some(f) = self.files.get(filename) {
             trace!("retrieving file from struct: {}", filename);
             return Some(f.clone());
@@ -137,12 +139,13 @@ impl<I: Seek + Read> PBO<I> {
     /// Removes a file, returning it if it existed
     pub fn remove(&mut self, filename: &str) -> Option<Cursor<Box<[u8]>>> {
         trace!("removing file from struct: {}", filename);
-        self.files.remove(filename)
+        self.files.remove(&filename.replace("/", "\\"))
     }
 
     /// Adds or updates a file to the PBO, returns the old file if it existed
     pub fn add(&mut self, filename: &str, file: Cursor<Box<[u8]>>) -> Option<Cursor<Box<[u8]>>> {
         trace!("adding file to struct: {}", filename);
-        self.files.insert(filename.to_string(), file)
+        self.files
+            .insert(filename.to_string().replace("/", "\\"), file)
     }
 }

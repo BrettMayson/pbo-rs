@@ -30,7 +30,9 @@ impl<I: Seek + Read> PBO<I> {
         }
 
         for header in &pbo.headers {
-            input.seek(SeekFrom::Current(i64::from(header.size))).unwrap();
+            input
+                .seek(SeekFrom::Current(i64::from(header.size)))
+                .unwrap();
         }
 
         input.seek(SeekFrom::Current(1))?;
